@@ -1457,7 +1457,7 @@ var IPython = (function (IPython) {
      */
     Notebook.prototype.execute_all_cells = function () {
         this.execute_cell_range(0, this.ncells());
-        this.scroll_to_bottom();
+        // this.scroll_to_bottom();
     };
 
     /**
