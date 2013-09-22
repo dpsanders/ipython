@@ -327,6 +327,11 @@ var IPython = (function (IPython) {
                 that.execute_all_cells();
                 that.control_key_active = false;
                 return false;
+            } else if (event.which === 69 && that.control_key_active) {
+                // Merge cells = 'e'
+                that.merge_cell_above();
+                that.control_key_active = false;
+                return false;
             } else if (that.control_key_active) {
                 that.control_key_active = false;
                 return true;
