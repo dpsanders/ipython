@@ -319,6 +319,53 @@ var IPython = (function (IPython) {
             var text_and_math = IPython.mathjaxutils.remove_math(text);
             text = text_and_math[0];
             math = text_and_math[1];
+            console.log(math);
+
+            for (var i=0; i<math.length; i++) {
+
+                console.log(i + " " + math[i]);
+                
+                var patt = /\$+([^\$]*)\$+/m;  
+                // final m is for multiline matching
+
+
+                var piece = patt.exec(math[i]); 
+
+                console.log(piece);
+
+                if (piece != null) {
+
+                    piece = piece[1];
+
+                    console.log(piece);
+
+                    var patt = /\beq/;
+                    
+                    if (patt.test(piece) ) {
+                        math[i] = "\\begin{equation}\n" + piece.slice(3) + "\\end{equation}\n";
+
+                    }
+
+                    var patt = /\balign/;
+                    
+                    if (patt.test(piece) ) {
+                        math[i] = "\\begin{align}\n" + piece.slice(6) + "\\end{align}\n";
+
+                    }
+
+                }
+
+                    console.log(math[i]);
+                
+
+            }
+
+
+
+
+
+
+
             var html = marked.parser(marked.lexer(text));
             html = $(IPython.mathjaxutils.replace_math(html, math));
             // links in markdown cells should open in new tabs
@@ -482,6 +529,22 @@ var IPython = (function (IPython) {
         return data;
     };
 
+    /**
+     * can the cell be split into two cells
+     * @method is_splittable
+     **/
+    HeadingCell.prototype.is_splittable = function () {
+        return false;
+    };
+
+
+    /**
+     * can the cell be merged with other cells
+     * @method is_mergeable
+     **/
+    HeadingCell.prototype.is_mergeable = function () {
+        return false;
+    };
 
     /**
      * Change heading level of cell, and re-render

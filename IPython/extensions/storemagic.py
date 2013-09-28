@@ -27,7 +27,6 @@ import inspect, os, sys, textwrap
 # Our own
 from IPython.config.configurable import Configurable
 from IPython.core.error import UsageError
-from IPython.core.fakemodule import FakeModule
 from IPython.core.magic import Magics, magics_class, line_magic
 from IPython.testing.skipdoctest import skip_doctest
 from IPython.utils.traitlets import Bool
@@ -211,20 +210,21 @@ class StoreMagics(Magics, Configurable):
                 obj = ip.user_ns[args[0]]
             except KeyError:
                 # it might be an alias
-                # This needs to be refactored to use the new AliasManager stuff.
-                if args[0] in ip.alias_manager:
-                    name = args[0]
-                    nargs, cmd = ip.alias_manager.alias_table[ name ]
-                    staliases = db.get('stored_aliases',{})
-                    staliases[ name ] = cmd
-                    db['stored_aliases'] = staliases
-                    print "Alias stored: %s (%s)" % (name, cmd)
-                    return
-                else:
-                    raise UsageError("Unknown variable '%s'" % args[0])
+                name = args[0]
+                try:
+                    cmd = ip.alias_manager.retrieve_alias(name)
+                except ValueError:
+                    raise UsageError("Unknown variable '%s'" % name)
+                
+                staliases = db.get('stored_aliases',{})
+                staliases[name] = cmd
+                db['stored_aliases'] = staliases
+                print "Alias stored: %s (%s)" % (name, cmd)
+                return
 
             else:
-                if isinstance(inspect.getmodule(obj), FakeModule):
+                modname = getattr(inspect.getmodule(obj), '__name__', '')
+                if modname == '__main__':
                     print textwrap.dedent("""\
                     Warning:%s is %s
                     Proper storage of interactively declared classes (or instances
