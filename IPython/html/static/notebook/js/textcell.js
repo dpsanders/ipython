@@ -321,41 +321,63 @@ var IPython = (function (IPython) {
             math = text_and_math[1];
             console.log(math);
 
+            var environments = {"eq": "equation",
+                            "eqn": "equation",
+                            "equation": "equation",
+                            "align": "align",
+                            "al": "align",
+                            "cases": "cases",
+                            "ca": "cases"
+                        };
+
             for (var i=0; i<math.length; i++) {
 
                 console.log(i + " " + math[i]);
                 
-                var patt = /\$+([^\$]*)\$+/m;  
-                // final m is for multiline matching
+                var patt = /\$+([^\$]*)\$+/m;  // final m is for multiline matching
 
-
-                var piece = patt.exec(math[i]); 
-
+                var piece = patt.exec(math[i]);
                 console.log(piece);
 
-                if (piece != null) {
-
-                    piece = piece[1];
-
-                    console.log(piece);
-
-                    var patt = /\beq/;
-                    
-                    if (patt.test(piece) ) {
-                        math[i] = "\\begin{equation}\n" + piece.slice(3) + "\\end{equation}\n";
-
-                    }
-
-                    var patt = /\balign/;
-                    
-                    if (patt.test(piece) ) {
-                        math[i] = "\\begin{align}\n" + piece.slice(6) + "\\end{align}\n";
-
-                    }
-
+                if (piece == null) {  // already in form of environment
+                    continue;
                 }
 
-                    console.log(math[i]);
+                // if (piece.length == 1) {  // ?
+                //     continue;
+                // }
+
+
+                piece = piece[1];
+                console.log(piece);
+
+                var patt = /^([a-z]+) ([^]+)/m;  // second is hack to match any char
+
+                var word = patt.exec(piece);
+
+                if (word == null) {
+                    continue;
+                }
+
+                var rest = word[2]
+                word = word[1];
+
+
+                console.log("word=" + word);
+                console.log("rest=" + rest);
+
+                var environment = environments[word];
+                console.log("environment=" + environment);
+
+                if (environment == null) {
+                    continue;
+                }
+
+                math[i] = "$\\begin{" + environment + "}\n" 
+                                + rest
+                                + "\\end{" + environment + "}$\n";
+
+                console.log(math[i]);
                 
 
             }
